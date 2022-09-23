@@ -100,9 +100,10 @@ func IPFamily(proto Protocol) option {
 	}
 }
 
-func Legacy() option {
+// spec path
+func Path(path string) option {
 	return func(ipt *IPTables) {
-		ipt.legacy = true
+		ipt.path = path
 	}
 }
 
@@ -129,16 +130,15 @@ func New(opts ...option) (*IPTables, error) {
 		opt(ipt)
 	}
 
-	path, err := exec.LookPath(getIptablesCommand(ipt.proto))
-	if err != nil {
-		return nil, err
+	if ipt.path != "" {
+		path, err := exec.LookPath(getIptablesCommand(ipt.proto))
+		if err != nil {
+			return nil, err
+		}
+		ipt.path = path
 	}
-	if ipt.legacy {
-		path = path + "-legacy"
-	}
-	ipt.path = path
 
-	vstring, err := getIptablesVersionString(path)
+	vstring, err := getIptablesVersionString(ipt.path)
 	if err != nil {
 		return nil, fmt.Errorf("could not get iptables version: %v", err)
 	}
