@@ -130,7 +130,7 @@ func New(opts ...option) (*IPTables, error) {
 		opt(ipt)
 	}
 
-	if ipt.path != "" {
+	if ipt.path == "" {
 		path, err := exec.LookPath(getIptablesCommand(ipt.proto))
 		if err != nil {
 			return nil, err
