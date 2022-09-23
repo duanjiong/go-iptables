@@ -73,6 +73,7 @@ type IPTables struct {
 	v1                int
 	v2                int
 	v3                int
+	legacy            bool
 	mode              string // the underlying iptables operating mode, e.g. nf_tables
 	timeout           int    // time to wait for the iptables lock, default waits forever
 }
@@ -96,6 +97,12 @@ type option func(*IPTables)
 func IPFamily(proto Protocol) option {
 	return func(ipt *IPTables) {
 		ipt.proto = proto
+	}
+}
+
+func Legacy() option {
+	return func(ipt *IPTables) {
+		ipt.legacy = true
 	}
 }
 
@@ -125,6 +132,9 @@ func New(opts ...option) (*IPTables, error) {
 	path, err := exec.LookPath(getIptablesCommand(ipt.proto))
 	if err != nil {
 		return nil, err
+	}
+	if ipt.legacy {
+		path = path + "-legacy"
 	}
 	ipt.path = path
 
